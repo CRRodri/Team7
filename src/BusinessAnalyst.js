@@ -1,18 +1,38 @@
-import './BusinessAnalyst.css';
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function BusinessAnalyst() {
   const [visible, setVisibleSection] = useState('section1');
-  const [selectedShop, setSelectedShop] = useState(null);
+  const [selectedShop, setSelectedShop] = useState('');
   const [shopData, setShopData] = useState('');
-  const [selectedRide, setSelectedRide] = useState(null);
+  const [selectedRide, setSelectedRide] = useState('');
   const [rideData, setRideData] = useState('');
-  const [formData, setFormData] = useState({
-    option: '',
-    text: '',
-    check: false,
-    radioOption: ''
-  });
+  const [businessreportData, setbusinessreportData] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+
+  const fetchData = async (url, setStateFunction) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.text();
+      const parser = new DOMParser();
+      const htmlDocument = parser.parseFromString(data, 'text/html');
+      setStateFunction(htmlDocument);
+    } catch (error) {
+      console.error(`Error fetching data from ${url}:`, error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData('shop_data_page.html', setShopData);
+    fetchData('ride_data_page.html', setRideData);
+  }, []);
+
+  
 
   const showSection = (section) => {
     setVisibleSection(section);
@@ -21,62 +41,10 @@ function BusinessAnalyst() {
   const handleShopIdChange = (event) => {
     setSelectedShop(event.target.value);
   };
+
   const handleRideIdChange = (event) => {
     setSelectedRide(event.target.value);
   };
-  const handleSelectChange = (event) => {
-    setVisibleSection(event.target.value);
-  }; 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    // Here, you can perform actions with the form data
-    console.log('Form Data:', formData);
-       // Example: You can fetch data from the server or perform other operations based on the form data
-    // fetch('http://your-api-endpoint', {
-    //   method: 'POST',
-    //   body: JSON.stringify(formData),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //   // Handle the response
-    // })
-    // .catch(error => {
-    //   console.error('Error:', error);
-    // });
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-
-    setFormData({
-      ...formData,
-      [name]: fieldValue
-    });
-  };
-
-
-
-
-
-
-  useEffect(() => {
-    // Fetch shop data from shops.html
-
-    fetch('shop_data_page.html')
-      .then((response) => response.text())
-      .then((data) => {
-        const parser = new DOMParser();
-        const htmlDocument = parser.parseFromString(data, 'text/html');
-        setShopData(htmlDocument);
-      })
-      .catch((error) => {
-        console.error('Error fetching shop data:', error);
-      });
-  }, []);
 
   const renderShopContent = () => {
     if (shopData) {
@@ -86,22 +54,6 @@ function BusinessAnalyst() {
     return null;
   };
 
-  useEffect(() => {
-    // Fetch shop data from shops.html
-    fetch('ride_data_page.html')
-      .then((response) => response.text())
-      .then((data) => {
-        const parser = new DOMParser();
-        const htmlDocument = parser.parseFromString(data, 'text/html');
-        setRideData(htmlDocument);
-      })
-      .catch((error) => {
-        console.error('Error fetching ride data:', error);
-      });
-  }, []);
-
-
-
   const renderRideContent = () => {
     if (rideData) {
       const selectedRideData = rideData.getElementById(selectedRide);
@@ -110,17 +62,83 @@ function BusinessAnalyst() {
     return null;
   };
 
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+  };
+
+ 
+  
+    useEffect(() => {
+    fetch('/api/businessreport')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+       setbusinessreportData(data.businessreportData);
+       setStartDate(data.StartDate);
+       setEndDate(data.EndDate);
+
+      })
+      .catch((error) => console.error('Error fetching data:', error));
+  }, []);
+
+
+  const handleBusiness = async (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+  
+    try {
+      const response = await fetch('/api/businessreport', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result); 
+      form.reset();
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
+
+    
+
+ 
+  
+    
+
+  
   return (
     <div className="App">
+      <link rel="preconnect" href="https://fonts.googleapis.com"></link>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin></link>
+      <link href="https://fonts.googleapis.com/css2?family=Jomhuria&family=Josefin+Sans&family=Mitr:wght@200&display=swap" rel="stylesheet"></link>
       <ul className="nav-headers">
         <li className="nav-item"><b>Theme Park</b></li>
         <li className="nav-item">Sign Out</li>
       </ul>
 
-        <div className="Welcome-back-employee">
+        <div >
         
 
-          <strong>Welcome back, {"{"}BusinessAnalyst{"}"}!</strong>
+          <h1 className="Welcome-back-employee"><strong>Welcome back, {"{"}BusinessAnalyst{"}"}!</strong></h1>
         </div>
         <div className="group">
           <div className="view">
@@ -138,8 +156,6 @@ function BusinessAnalyst() {
               <button className="ParkInfoButton"onClick={() => showSection('section3')}>
                 View Report
               </button>
-
-            
             </div>
             <div className="Menutxt">Menu</div>
             
@@ -148,8 +164,8 @@ function BusinessAnalyst() {
               <div className="optiontextbox">
                 <h2>Shop-data info</h2>
                 <h3>Shop information</h3>
-  {/* Dropdown menu for shop selection */}
-  <select value={selectedShop} onChange={handleShopIdChange}>
+  
+        <select value={selectedShop} onChange={handleShopIdChange}>
         <option value="">Select a shop</option>
         <option value="Adventures Emporium">Adventures Emporium</option>
         <option value="Whimsical Wares">Whimsical Wares</option>
@@ -157,7 +173,7 @@ function BusinessAnalyst() {
         <option value="Wonderland Gifts">Wonderland Gifts</option>
 
         {/* Add more options for other shops as needed */}
-      </select>
+        </select>
 
       {/* Render shop content based on the selected shop */}
       <div className="shopContent" dangerouslySetInnerHTML={{ __html: renderShopContent() }}></div>
@@ -207,82 +223,78 @@ function BusinessAnalyst() {
                
           </div>
         </div>
-            <div style={{ display: visible === 'section3' ? 'block' : 'none' }}>
-              <div className="optiontextbox">
-                <h2>Park Information//Reports</h2>
-                <p>Here are some important business info about the theme park, please fill out the form down below!</p>
-                
-                <form onSubmit={handleFormSubmit}>
+        
+      {/* Section for displaying reports */}
+      <div style={{ display: visible === 'section3' ? 'block' : 'none' }}>
       
-      <label>
-         Report options:
-        <select name="option" value={formData.option} onChange={handleInputChange}>
-          <option value="Select an option">Select an option</option>
-          <option value="Costumer info">Costumer info report</option>
-          <option value="Business info">Business info report</option>
-          {/* Add your options here */}
-        </select>
-      </label>
-      <br />
+      <div className="optiontextbox">
 
-      <label>
-        Text Input:
-        <input type="text" name="text" value={formData.text} onChange={handleInputChange} />
-      </label>
-      <br />
-
-      <label>
-        Checkbox:
-        <input type="checkbox" name="check" checked={formData.check} onChange={handleInputChange} />
-      </label>
-      <br />
-
-      {/* Radio buttons example */}
-   
-      <h1 class="date-period">Date Period</h1>
-      <label>
-        Monthly:
-        <input
-          type="radio"
-          name="radioOption"
-          value="option1"
-          checked={formData.radioOption === 'option1'}
-          onChange={handleInputChange}
-        />
-      </label>
-      <label>
-        Weekly:
-        <input
-          type="radio"
-          name="radioOption"
-          value="option2"
-          checked={formData.radioOption === 'option2'}
-          onChange={handleInputChange}
-        />
-      </label>
-      <br />
-    
-
-      <input type="submit" value="Submit" />
-    </form>
-
-              </div>
-            </div>
-
-            
-            </div>
-          </div>
-        </div>
+      <form onSubmit={handleBusiness}>
+        
+    <div className="date-pickers">
+      <label htmlFor="startDate">Start Date:</label>
+      <DatePicker
+        selected={startDate}
+        onChange={handleStartDateChange}
+        id="startDate"
+        name="startDate"
+        dateFormat="yyyy-MM-dd"
+      />
       
+      <label htmlFor="endDate">End Date:</label>
+      <DatePicker
+        selected={endDate}
+        onChange={handleEndDateChange}
+        id="endDate"
+        name="endDate"
+        dateFormat="yyyy-MM-dd"
+      />
+      
+      <button type="submit">Fetch Reports</button>
+    </div>
+  </form>
 
-
+  <table>
+    <thead>
+      <tr>
+        <th>Frequency</th>
+        <th>Year</th>
+        <th>PeriodStartDate</th>
+        <th>PeriodEndDate</th>
+        <th>NewAmount</th>
+        <th>OldAmount</th>
+        <th>AllCustomers</th>
+        {/* Add more header columns if needed */}
+      </tr>
+    </thead>
+    <tbody>
+      {businessreportData && businessreportData.map((tickets, index) => (
+        <tr key={index}>
+          <td>{tickets.Frequency}</td>
+          <td>{tickets.Year}</td>
+          <td>{tickets.PeriodStartDate}</td>
+          <td>{tickets.PeriodEndDate}</td>
+          <td>{tickets.NewAmount}</td>
+          <td>{tickets.OldAmount}</td>
+          <td>{tickets.AllCustomers}</td>
+          {/* Adjust property names as per your data structure */}
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </div>
-
-   
+</div>
+    </div>
+    </div>
+    </div>
+    
+    </div>
 
 
     
-  );
+  )
 }
+    
+
 
 export default BusinessAnalyst;
