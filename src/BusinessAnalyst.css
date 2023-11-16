@@ -1,5 +1,8 @@
 .nav-headers li:first-child {
   float: left;
+  font-family: 'Jomhuria', sans-serif;
+  font-size: 40px;
+  font-weight: 400;
 }
 
 .nav-headers {
@@ -10,32 +13,30 @@
   background-color: rgba(191, 26, 47, 1);
 }
 
+#signout *{
+  color: white;
+}
+
 .nav-item {
-  font-family: 'Jomhuria', sans-serif;
   float: right;
   display: block;
   color: white;
+  text-align: center;
   padding: 14px 16px;
-  font-size: 40px;
-  letter-spacing: 1px;
-}
-
-#signout *{
-  color: white;
-  font-family: 'Mitr', serif;
   font-size: 20px;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.welcome-back-employee {
+
+.Welcome-back-employee *{
   color: #000000;
   font-family: "Jomhuria-Regular", Helvetica;
-  font-size: 40px;
+  font-size: 0px;
   font-weight: 400;
   left: 70px;
+  letter-spacing: 0;
   position: absolute;
   top: 150px;
+
 }
 
 .group {
@@ -45,8 +46,6 @@
   top: 252px;
   width: 1321px;
 }
-
-
 
 .mainbox {
   background: linear-gradient(180deg, rgb(236, 243, 246) 99.99%, rgb(255, 239, 176) 100%);
@@ -198,4 +197,73 @@ table, th, td {
 
 h3{
   font-size: 16px;
+}
+
+/*form styles below*/
+
+
+div{
+  margin-bottom: 2%;
+}
+
+label{
+  display: block;
+  margin-bottom: 1px;
+}
+
+input{
+  width: 40%;
+  padding: 1%;
+}
+
+#PurchTicketButton{
+  background-color: #bd1515;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#PurchTicketButton:hover{
+  background-color: #580808;
+}
+
+#UpdateAccInfoButton{
+  background-color: #bd1515;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#UpdateAccInfoButton:hover{
+  background-color: #580808;
+}
+
+#UpdateAccPasButton{
+  background-color: #bd1515;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#UpdateAccPasButton:hover{
+  background-color: #580808;
+}
+
+#TicketsTypes{
+  padding: 10px;
+}
+
+#AccountDeleteButton{
+  background-color: #bd1515;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#AccountDeleteButton:hover{
+  background-color: #580808;
 }
