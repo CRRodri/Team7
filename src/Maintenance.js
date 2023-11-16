@@ -1,6 +1,6 @@
 import './Maintenance.css';
 import React, { useState, useEffect } from 'react';
-import { Link } from "react-router-dom"; 
+import { Link, Navigate, useNavigate } from "react-router-dom"; 
 
 function Maintenance() {
   const [visible, setVisibleSection] = useState('section1');
@@ -162,8 +162,33 @@ function Maintenance() {
       console.error('Error submitting form:', error);
     }
   };
+
+  const[InjuryReportData, setInjuryReportData] = useState([]);
+  useEffect(() => {
+    
+    fetch('/api/injuryreport')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => setInjuryReportData(data))
+      .catch((error) => console.error('Error fetching data:', error));
+  }, []);
   
+  const navigate = useNavigate();
+
+  const signOut = () => {
+    localStorage.removeItem("authenticatedM");
+    navigate("/"); //Navigate back to main page
+  };
   
+  if (localStorage.getItem("authenticatedM") == false || localStorage.getItem("authenticatedM") == null) {
+    console.log("Unsuccessful login");
+    return <Navigate replace to={navigate(-1)} />;
+  }
+  else {
   return (
        <div className="App">
        <link rel="preconnect" href="https://fonts.googleapis.com"></link>
@@ -172,7 +197,7 @@ function Maintenance() {
       <ul className="nav-headers">
         <li className="nav-item"><u>DB Theme Park</u></li>
         <li className="nav-item" id='signout'>
-        <Link to="/">Sign Out</Link>
+          <button onClick={signOut}>Sign out</button>
           </li>
       </ul>
       {StaffData.map((employee) => (
@@ -199,6 +224,9 @@ function Maintenance() {
               </button>
               <button className="RideBreakdowns"onClick={() => showSection('section3')}>
                 Ride Information
+              </button>
+              <button className="InjuryReport"onClick={() => showSection('section4')}>
+                Injury Report
               </button>
               
             
@@ -435,6 +463,39 @@ function Maintenance() {
                  </table>
                  </div>
                  </div>
+                 <div style={{ display: visible === 'section4' ? 'block' : 'none' }}>
+              <div className="optiontextbox">
+                <h2>Injury Report</h2>
+                  <div class = "Injury_report">
+                  <table>
+                      <thead>
+                      <tr>
+                        <th>Ride </th>
+                        <th>Year</th>
+                        <th>Month </th>
+                        <th>Week </th>
+                        <th>Average Injured Cases </th>
+                        <th>Break Down Count </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {InjuryReportData.map((injury_case) => (
+                        <tr key={injury_case.id}>
+                        <td>{injury_case.RideName}</td>
+                        <td>{injury_case.Year}</td>
+                        <td>{injury_case.Month}</td>
+                        <td>{injury_case.Week}</td>
+                        <td>{injury_case.AvgInjured}</td>
+                        <td>{injury_case.Breakdowns}</td>
+                        </tr>
+                      ))}
+                      </tbody>
+                  </table>
+                
+                   </div>
+                   
+                  </div>
+              </div>
             </div>
                   
                 <br></br>
@@ -451,6 +512,7 @@ function Maintenance() {
 
 
   );
+  }
 }
 
 

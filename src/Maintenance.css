@@ -120,6 +120,17 @@
   width: 168px;
 }
 
+.InjuryReport{
+  color: #000000;
+  font-size: 20px;
+  left: 15px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 290px;
+  width: 168px;
+}
+
 .HazardRep {
   color: #000000;
   font-size: 20px;
@@ -196,4 +207,3 @@ input{
 #UpdateAccButton:hover{
   background-color: #580808;
 }
-

@@ -1,7 +1,6 @@
 import './Visitorpage.css';
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 function Visitorpage() {
   const [visible, setVisibleSection] = useState('section1');
@@ -12,6 +11,7 @@ function Visitorpage() {
 
   const[RideData, setRideData] = useState([]);
   const [InactiveRides, setInactiveRides] = useState([]);
+  const [userInfo, setuserInfo] = useState([]);
   useEffect(() => {
     
     fetch('/api/ride')
@@ -24,9 +24,11 @@ function Visitorpage() {
       .then((data) => {
         setRideData(data.RideData);
         setInactiveRides(data.InactiveRides);
+        setuserInfo(data.userInfo);
       })
       .catch((error) => console.error('Error fetching data:', error));
   }, []);
+
   
   const handlePurchaseTicket = async (event) => {
     event.preventDefault();
@@ -78,11 +80,53 @@ function Visitorpage() {
       const result = await response.json();
       console.log(result); 
       form.reset();
-
+      localStorage.removeItem("authenticatedV");
+      window.location.href = '/SignIn';
     } catch (error) {
       console.error('Error submitting form:', error);
     }
   };
+
+  const AccountUpdate = async (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+  
+    try {
+      const response = await fetch('/api/AccountUpdate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result); 
+      form.reset();
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };  
+
+  const navigate = useNavigate();
+
+  const signOut = () => {
+    localStorage.removeItem("authenticatedV");
+    navigate("/"); //Navigate back to main page
+  };
+
+  if (localStorage.getItem("authenticatedV") == false || localStorage.getItem("authenticatedV") == null) {
+    console.log("Unsuccessful login");
+    return <Navigate replace to={navigate(-1)} />;
+  }
+  else {
   return (
        <div className="App">
        <link rel="preconnect" href="https://fonts.googleapis.com"></link>
@@ -91,12 +135,12 @@ function Visitorpage() {
       <ul className="nav-headers">
         <li className="nav-item"><u>DB Theme Park</u></li>
         <li className="nav-item" id='signout'>
-        <Link to="/">Sign Out</Link>
+          <button onClick={signOut}>Sign out</button>
           </li>
       </ul>
 
         <div className="welcome-back-visitor">
-          Welcome back, {"{"}Visitor name{"}"}!
+          Welcome back, visitor!
         </div>
         
     
@@ -127,32 +171,57 @@ function Visitorpage() {
             <div style={{ display: visible === 'section1' ? 'block' : 'none' }}>
               <div className="optiontextbox">
                 <h2>Your Account Information</h2>
-                <h3>Visitor ID: </h3>
                   <div class = "Account-Info">
                   <table>
+                  <thead>
                       <tr>
+                        <th>Username </th>
                         <th>First Name </th>
                         <th>Last Name </th>
-                        <th>Username </th>
+                        <th>Password </th>
                         <th>Email </th>
-                        <th>Adress </th>
+                        <th>phone_number </th>
+                        <th>Address </th>
                         <th>Payment Method </th>
                       </tr>
-                      <tr>
-                        <td>Jane</td>
-                        <td>Doe</td>
-                        <td>JaneUSer</td>
-                        <td>EmailJaneUser@jane.com</td>
-                        <td>EmailJaneUser Street</td>
-                        <td>124324324324</td>
-                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {userInfo.map((customer) => (
+                        <tr key={customer.id}>
+                          <td>{customer.user_tag}</td>
+                          <td>{customer.first_name}</td>
+                          <td>{customer.last_name}</td>
+                          <td>{customer.user_pass}</td>
+                          <td>{customer.email}</td>
+                          <td>{customer.phone_number}</td>
+                          <td>{customer.home_address}</td>               
+                          <td>{customer.payment_method}</td>
+                        </tr>
+                      ))}
+
+                    </tbody>
+
                   </table>
-                  <p> Update the above information by inputing information below. If you don't wish to update something, leave it blank.
+                  <p> Update the above information by inputing information below.
                   </p>
                   
                     
-                      <form id="UpdateAccInfo" method="post" action="/submit">
+                      <form id="UpdateAccInfo" onSubmit={AccountUpdate} method="post" action="/submit">
                               <div>
+                              <h3> Confirm your username below.</h3>    
+                              </div>
+
+                              <div>
+                              <label for="CurrentUsername">Current Username: </label>
+                              <input type="text" id="CurrentUsername" name="CurrentUsername"/>
+                              </div>
+                              <div>
+
+                              <div>
+                              <h3> Edit information below.</h3>    
+                              </div>
+                              
                               <label for="FirstName ">First Name:</label>
                               <input type="text" id="firstName" name="firstName"/>
                               </div>
@@ -164,7 +233,12 @@ function Visitorpage() {
 
                               <div>
                               <label for="Username">Username: </label>
-                              <input type="text" id="Username" name="lastName" required/>
+                              <input type="text" id="Username" name="Username" required/>
+                              </div>
+
+                              <div>
+                              <label for="Password">Password: </label>
+                              <input type="text" id="Password" name="Password" required/>
                               </div>
 
                               <div>
@@ -178,37 +252,13 @@ function Visitorpage() {
                               </div>
 
                               <div>
-                              <label for="PaymentMethod">Payment Card: </label>
-                              <input type="text" id="Payment" name="Payment"/>
+                              <label for="Payment">Payment Card: </label>
+                              <input type="text" id="Payment" name="Payment" pattern="[0-9]{16}" required/>
                               </div>
                               <button id="UpdateAccInfoButton" type="submit">Submit</button>
                           
                       </form>
 
-                      <h2> Security Information
-                       </h2>
-                       <table>
-                      <tr>
-                        <th>Current Password </th>
-                      </tr>
-                      <tr>
-                        <td>Jane234324</td>
-                      </tr>
-                      </table>
-
-                  <p> Do you want to change your password?</p>
-                  
-                      <form id="UpdateAccPas" method="post" action="/submit">
-                          <p>
-                              <label for="Password ">New Password:  </label>
-                              <input type="text" id="Password" name="Password" required/>
-  
-                          </p>
-                          <p>
-                              <button id="UpdateAccPasButton" type="submit">Submit</button>
-                          </p>
-
-                      </form>
                    </div>
                    
                   </div>
@@ -316,7 +366,7 @@ function Visitorpage() {
                         <tr key={ride_info.id}>
                           <td>{ride_info.RideName}</td>
                           <td>{ride_info.Description}</td>
-                          {/* Add more cells as needed */}
+                          
                         </tr>
                       ))}
 
@@ -338,13 +388,13 @@ function Visitorpage() {
                         <tr key={ride_info.id}>
                           <td>{ride_info.InactiveRide}</td>
                           <td>{ride_info.InactiveDescript}</td>
-                          {/* Add more cells as needed */}
+                          
                         </tr>
                       ))}
 
                     </tbody>
                 </table>
-
+  
                  <h3>More Information</h3>
                  <p> Parking is included with the purchase of ticket(s). <br>
                  </br>Tickets are required to enter the park. One ticket allows entry for one visitor. <br></br> </p>
@@ -400,6 +450,7 @@ function Visitorpage() {
 
 
   );
+  }
 }
 
 

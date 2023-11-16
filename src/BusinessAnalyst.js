@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 function BusinessAnalyst() {
   const [visible, setVisibleSection] = useState('section1');
@@ -118,12 +119,17 @@ function BusinessAnalyst() {
     }
   };
 
-    
+  const navigate = useNavigate();
 
- 
-  
-    
+  const signOut = () => {
+    localStorage.removeItem("authenticatedB");
+    navigate("/"); //Navigate back to main page
+  };
 
+  if (localStorage.getItem("authenticatedB") == false || localStorage.getItem("authenticatedB") == null) {
+    console.log("Unsuccessful login");
+    return <Navigate replace to={navigate(-1)} />;
+  }
   
   return (
     <div className="App">
@@ -132,7 +138,7 @@ function BusinessAnalyst() {
       <link href="https://fonts.googleapis.com/css2?family=Jomhuria&family=Josefin+Sans&family=Mitr:wght@200&display=swap" rel="stylesheet"></link>
       <ul className="nav-headers">
         <li className="nav-item"><b>Theme Park</b></li>
-        <li className="nav-item">Sign Out</li>
+        <li className="nav-item"><button onClick={signOut}>Sign out</button></li>
       </ul>
 
         <div >
