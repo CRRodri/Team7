@@ -698,32 +698,3 @@ server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-function serveStaticFile(req, res) {
-  const filePath = req.url === '/' ? 'build/index.html' : path.join(__dirname, 'build', req.url); //important
-  const contentType = getContentType(filePath);
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not Found');
-    } else {
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(data);
-    }
-  });
-}
-
-// Function to determine the content type based on file extension
-function getContentType(filePath) {
-  const extname = path.extname(filePath);
-  switch (extname) {
-    case '.js':
-      return 'text/javascript';
-    case '.css':
-      return 'text/css';
-    case '.html':
-      return 'text/html';
-    default:
-      return 'application/octet-stream';
-  }
-}
