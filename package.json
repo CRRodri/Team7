@@ -17,8 +17,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"node src/server.js\" \"react-scripts start\"",
-    "build": "CI=false && react-scripts build",
+    "start:react": "react-scripts start",
+    "build:react": "react-scripts build",
+    "start:server": "node server.js",
+    "start": "concurrently \"npm run build:react\" \"npm run start:server\""
     "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject"
   },
